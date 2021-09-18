@@ -1,8 +1,8 @@
 import discord
-import ydl
 import config
-import parse_args
-import media_commands
+from bot_modules import ydl
+from bot_modules import parse_args
+from bot_modules import media_commands
 
 async def process(msg):
     await msg.channel.send(msg.content[len(config.PREFIX):])
