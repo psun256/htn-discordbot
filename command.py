@@ -1,5 +1,4 @@
 import discord
-import ydl
 import config
 import parse_args
 import media_commands
