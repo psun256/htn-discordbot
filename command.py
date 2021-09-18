@@ -1,8 +1,12 @@
 import discord
 import ydl
 import config
+import parse_args
 
-async def process(message):
-    # just testing to see if input is handled properly
-    await message.channel.send(message.content[len(config.PREFIX):])
-    await ydl.downloadVideo(message.content[len(config.PREFIX):], message)
+async def process(msg):
+    await msg.channel.send(msg.content[len(config.PREFIX):])
+    args, flags = parse_args.parse(msg.content[len(config.PREFIX):])
+    print("args:")
+    print(args)
+    print("flags")
+    print(flags)
