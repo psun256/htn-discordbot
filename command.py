@@ -1,4 +1,4 @@
 import discord
 
-def process(message):
-    0
+async def process(msg):
+    await msg.channel.send("processed")
