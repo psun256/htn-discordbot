@@ -12,6 +12,5 @@ class MyClient(discord.Client):
         if (message.content.startswith(config.PREFIX)):
             await command.process(message)
 
-
 client = MyClient()
 client.run(config.TOKEN)
