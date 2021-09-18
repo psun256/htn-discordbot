@@ -31,15 +31,16 @@ async def execute(message, args, flags):
                 return
             elif len(flags) == 1:
                 flag = flags[0].split(":")
+                ## if we do not have 2 tokens after splitting this flag is formatted incorrectly
+                if len(flag) != 2:
+                    await message.channel.send("Invalid flag format")
+                    return
                 ## since single flag, cannot be s
                 if flag[0] != "-v":
-                    await message.channel.send("Invalid flag")
+                    await message.channel.send("Invalid flag format")
                     return
                 else:
-                    print(type(flag[1]))
-                    print(flag[1])
                     flag[1] = flag[1].lstrip("0")
-                    print(flag[1])
                     ## in case flag[1] = 0
                     if not flag[1]:
                         flag[1] = "0"
@@ -54,6 +55,10 @@ async def execute(message, args, flags):
                 ## split so we can parse the validity
                 flag1 = flags[0].split(":")
                 flag2 = flags[1].split(":")
+                ## if we do not have 2 tokens after splitting this flag is formatted incorrectly
+                if len(flag1) != 2 or len(flag2) != 2:
+                    await message.channel.send("Invalid flag format")
+                    return
                 ## add to a set
                 allflags = set()
                 allflags.add(flag1[0])
