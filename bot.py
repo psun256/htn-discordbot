@@ -1,4 +1,5 @@
 import discord
+import youtube_dl
 import config
 import command
 
@@ -7,8 +8,10 @@ class MyClient(discord.Client):
         print('{0} ready to vibe ig'.format(self.user))
 
     async def on_message(self, message):
-        if (message.author.bot): return
-        if (message.content.startswith(config.PREFIX))
+        if (message.author.bot): return                 # to ignore bot messages
+        if (message.content.startswith(config.PREFIX)):
+            command.process(message)
+
 
 client = MyClient()
 client.run(config.TOKEN)

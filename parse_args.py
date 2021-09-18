@@ -1,0 +1,3 @@
+def parse():
+    args = []
+    flags = []
