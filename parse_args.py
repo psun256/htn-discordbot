@@ -6,6 +6,8 @@ def parse(str):
     flags = []
     # process each token one by one
     for token in tokens:
+        # convert to lowercase
+        token = token.lower()
         # flags have "-" in front of them
         if (token[0] == "-"):
             flags.append(token)
