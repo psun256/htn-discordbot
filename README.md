@@ -1,3 +1,3 @@
 # Discord Bot for Hack the North 2021
 
-Copy the config_example.py file to config.py, and put your token and bot prefix there
+Make config.py, copy config_example.py there, and put your token, bot prefix, and maximum video duration there
