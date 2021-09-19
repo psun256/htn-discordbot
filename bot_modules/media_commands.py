@@ -18,13 +18,13 @@ async def execute(msg, args, flags):
         await play(args, flags, channel)
     
     if (args[0] == "pause"):
-        await pause()
+        await pause(channel)
     
     if (args[0] == "continue"):
-        await resume()
+        await resume(channel)
     
     if (args[0] == "stop"):
-        await stop()
+        await stop(channel)
     
     if (args[0] == "volume"):
         await volume(channel, args)
