@@ -2,6 +2,7 @@ import config
 from bot_modules import parse_args
 from bot_modules import media_commands
 from bot_modules import channel_commands
+from bot_modules import search
 
 async def process(msg):
     # debug
@@ -9,8 +10,8 @@ async def process(msg):
 
     args, flags = parse_args.parse(msg.content[len(config.PREFIX):])
     mediaCommands = {"play", "pause", "continue", "stop", "volume"}
-    channelCommands = {"join", "leave"}
-    
+    channelCommands = {"join", "leave", "search"}
+
     # debug
     #print("args:")
     #print(args)
@@ -20,11 +21,11 @@ async def process(msg):
     # if its under media commands
     if args and args[0] in mediaCommands:
         await media_commands.execute(msg, args, flags)
-    
+
     # if its under channel commands
     elif args and args[0] in channelCommands:
         await channel_commands.execute(msg, args, flags)
-    
+
     # invalid command, nothing is modified
     else:
         await msg.channel.send("invalid command")
