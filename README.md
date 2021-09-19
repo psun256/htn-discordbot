@@ -12,6 +12,8 @@ To run the bot, first clone the repository. Then, copy `config_example.py` into 
 
 You will have to use pip to install the `discord.py` library and the voice packages by running these commands:
 
+Additional non-python dependancies include `ffmpeg`
+
 `pip install discord.py`
 
 `pip install discord.py[voice]`
