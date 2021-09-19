@@ -68,27 +68,27 @@ async def play(args, flags, channel):
         vc.src.play(discord.FFmpegPCMAudio(song["formats"][0]["url"]))
         vc.src.source = discord.PCMVolumeTransformer(vc.src.source, volume = (vol/100))
 
-async def pause():
+async def pause(channel):
     if (not vc.src.is_playing()):   
-        print("Already not playing")
+        channel.send("Already not playing")
         return
     vc.src.pause()
 
-async def resume():
+async def resume(channel):
     if (vc.src.is_playing()):   
-        print("Already playing")
+        channel.send("Already playing")
         return
     vc.src.resume()
 
-async def stop():
+async def stop(channel):
     if (not vc.src.is_playing()):   
-        print("Already not playing")
+        channel.send("Already not playing")
         return
     vc.src.stop()
 
 async def volume(channel, args):
     if (not vc.src.is_playing()):   
-        print("Nothing is playing")
+        channel.send("Nothing is playing")
         return
 
     vol = 100
@@ -98,7 +98,7 @@ async def volume(channel, args):
         
         if (isnumber(args[1])):
             vol = int(args[1])
-            await channel.send("Made the volume " + vol + " percent louder")
+            await channel.send("Set the volume to " + str(vol) + " percent of previous level")
             vc.src.source = discord.PCMVolumeTransformer(vc.src.source, volume = (vol/100))
 
         else:
