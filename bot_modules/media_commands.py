@@ -71,17 +71,22 @@ async def play(args, flags, channel):
         vc.src.stop()
 
         waiting = await channel.send("Processing request...")
-        
+
         # extract source info from url
         with youtube_dl.YoutubeDL({}) as ydl:
-            song = ydl.extract_info(args[1], download=False)
+            # make sure the video is not age restricted
+            try:
+                song = ydl.extract_info(args[1], download=False)
+            except youtube_dl.utils.DownloadError:
+                await channel.send("The link cannot be accessed, check if the url is properly typed or the video is age restricted")
+                return
 
         # play the audio at the proper volume
         vc.src.play(discord.FFmpegPCMAudio(song["formats"][0]["url"]))
         await discord.Message.delete(waiting)
         vc.src.source = discord.PCMVolumeTransformer(vc.src.source, volume = (vol/100))
         await channel.send("Playing the video at volume level " + str(vol))
-    
+
     # if they didn't enter enough arguments
     else: await channel.send("Please enter something valid")
 
@@ -100,7 +105,7 @@ async def resume(channel):
 
     await channel.send("Resumed")
     vc.src.resume()
-    
+
 async def stop(channel):
     if (not vc.src.is_playing()):
         await channel.send("Already not playing")

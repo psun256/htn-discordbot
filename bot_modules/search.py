@@ -8,7 +8,7 @@ async def find_videos(arg, message):
     if (arg.strip() == ""):
         await message.channel.send("Please enter a search parameter")
         return
-    
+
     # regex thing i stole off the internet to help us filter out websites,
     # because youtube dl doesn't have fun when you enter a website or video
     expression = r"(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"
@@ -45,7 +45,7 @@ async def find_videos(arg, message):
         embd.set_thumbnail(url=video[i]['thumbnail'])
 
         await message.channel.send(embed = embd)
-    
+
     # if its empty then let them know
     if empty:
         await message.channel.send("No results :(")
