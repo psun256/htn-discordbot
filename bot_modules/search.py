@@ -32,9 +32,6 @@ async def find_videos(arg, message):
 
     # create embed
     empty = True
-    embd = discord.Embed(
-        title = "Search Results"
-    )
 
     for i in range(min(5, len(video))):
 
@@ -44,17 +41,19 @@ async def find_videos(arg, message):
         seconds = duration % 60
 
         # build the embed
-        embd.add_field(
-            name = str(i + 1) + ". " + video[i]['title'],
-            value = "[Video Link](" + video[i]['webpage_url'] + ") | [" + video[i]['uploader'] + "](" + video[i]['uploader_url'] + ")\nDuration: " + str(minutes) + "m " + str(seconds) + "s",
-            inline = False
+        embd = discord.Embed(title = "Search Result " + str(i+1))
+        
+        embd.add_field(name = str(i + 1) + ". " + video[i]['title'],
+        value = "[Video Link](" + video[i]['webpage_url'] + ") | Channel: [" + video[i]['uploader'] + "](" + video[i]['uploader_url'] + ")\nDuration: " + str(minutes) + "m " + str(seconds) + "s" + '\n' + video[i]['description'][:100] + ("..." if len(video[i]['description']) > 100 else ""),
+        inline = False
         )
 
-        embd.add_field(
-            name = "Description",
-            value = video[i]['description'][:40] + ("..." if len(video[i]['description']) > 40 else "")
-        )
-    if empty:
-        await message.channel.send("No results :(")
-    else:
-        await message.channel.send(embed = embd, allowed_mentions = discord.AllowedMentions(everyone = False))
+        embd.set_thumbnail(url=video[i]['thumbnail'])
+        
+        if empty:
+            await message.channel.send("No results :(")
+
+        else:
+            await message.channel.send(embed = embd, allowed_mentions = discord.AllowedMentions(everyone = False))    
+        
+  
