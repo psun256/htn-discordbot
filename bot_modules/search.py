@@ -50,10 +50,10 @@ async def find_videos(arg, message):
 
         embd.set_thumbnail(url=video[i]['thumbnail'])
         
-        if empty:
-            await message.channel.send("No results :(")
+    if empty:
+        await message.channel.send("No results found :(")
 
-        else:
-            await message.channel.send(embed = embd, allowed_mentions = discord.AllowedMentions(everyone = False))    
+    else:
+        await message.channel.send(embed = embd, allowed_mentions = discord.AllowedMentions(everyone = False))    
         
   
