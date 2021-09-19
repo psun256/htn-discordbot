@@ -1,5 +1,6 @@
 import discord
 import youtube_dl
+import re
 from . import vc
 
 # custom function to determine if a string is an integer since built in functions were sus
@@ -34,7 +35,7 @@ async def play(args, flags, channel):
     vol = 100
 
     # if there are enough arguments (so its a good link)
-    if (len(args) >= 2 and "youtube.com/watch?v=" in args[1]):
+    if (len(args) >= 2 and re.search(r"^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*(?:[&\/\#].*)?$", args[1])):
 
         # parse flags (volume is the only one)
         if (flags):
@@ -74,12 +75,27 @@ async def play(args, flags, channel):
 
         # extract source info from url
         with youtube_dl.YoutubeDL({}) as ydl:
-            # make sure the video is not age restricted
+            # make sure the video is not age restricted, or other stuff
             try:
                 song = ydl.extract_info(args[1], download=False)
-            except youtube_dl.utils.DownloadError:
-                await channel.send("The link cannot be accessed, check if the url is properly typed or the video is age restricted")
-                return
+
+            # gone wrong
+            except youtube_dl.utils.DownloadError as e:
+                if ("age" in str(e)):
+                    await channel.send("The video is flagged as inappropriate")
+                    return
+
+                elif ("unavailable" in str(e)):
+                    await channel.send("The video is unavailable")
+                    return
+                
+                elif ("Premieres" in str(e)):
+                    await channel.send("Cannot play premieres")
+                    return
+                
+                else:
+                    await channel.send("An error occurred")
+                    return
 
         # play the audio at the proper volume
         vc.src.play(discord.FFmpegPCMAudio(song["formats"][0]["url"]))
