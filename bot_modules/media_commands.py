@@ -75,12 +75,23 @@ async def play(args, flags, channel):
 
         # extract source info from url
         with youtube_dl.YoutubeDL({}) as ydl:
-            # make sure the video is not age restricted
+            # make sure the video is not age restricted, or other stuff
             try:
                 song = ydl.extract_info(args[1], download=False)
-            except youtube_dl.utils.DownloadError:
-                await channel.send("The link cannot be accessed, check if the url is properly typed or the video is age restricted")
-                return
+
+            # gone wrong
+            except youtube_dl.utils.DownloadError as e:
+                if ("age" in str(e)):
+                    await channel.send("The video is flagged as inappropriate")
+                    return
+
+                elif ("unavailable" in str(e)):
+                    await channel.send("The video is unavailable")
+                    return
+                
+                else:
+                    await channel.send("An error has occurred")
+                    return
 
         # play the audio at the proper volume
         vc.src.play(discord.FFmpegPCMAudio(song["formats"][0]["url"]))
