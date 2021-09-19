@@ -16,16 +16,16 @@ async def execute(msg, args, flags):
 
     if (args[0] == "play"):
         await play(args, flags, channel)
-    
+
     if (args[0] == "pause"):
         await pause(channel)
-    
+
     if (args[0] == "continue"):
         await resume(channel)
-    
+
     if (args[0] == "stop"):
         await stop(channel)
-    
+
     if (args[0] == "volume"):
         await volume(channel, args)
 
@@ -64,30 +64,30 @@ async def play(args, flags, channel):
 
         with youtube_dl.YoutubeDL({}) as ydl:
             song = ydl.extract_info(args[1], download=False)
-            
+
         vc.src.play(discord.FFmpegPCMAudio(song["formats"][0]["url"]))
         vc.src.source = discord.PCMVolumeTransformer(vc.src.source, volume = (vol/100))
 
 async def pause(channel):
-    if (not vc.src.is_playing()):   
+    if (not vc.src.is_playing()):
         await channel.send("Already not playing")
         return
     vc.src.pause()
 
 async def resume(channel):
-    if (vc.src.is_playing()):   
+    if (vc.src.is_playing()):
         await channel.send("Already playing")
         return
     vc.src.resume()
 
 async def stop(channel):
-    if (not vc.src.is_playing()):   
+    if (not vc.src.is_playing()):
         await channel.send("Already not playing")
         return
     vc.src.stop()
 
 async def volume(channel, args):
-    if (not vc.src.is_playing()):   
+    if (not vc.src.is_playing()):
         await channel.send("Nothing is playing")
         return
 
@@ -95,7 +95,7 @@ async def volume(channel, args):
 
     if (len(args) >= 2):
         args[1] = args[1].lstrip("0")
-        
+
         if (isnumber(args[1])):
             vol = int(args[1])
             await channel.send("Set the volume to " + str(vol) + " percent of previous level")
