@@ -70,25 +70,25 @@ async def play(args, flags, channel):
 
 async def pause(channel):
     if (not vc.src.is_playing()):   
-        channel.send("Already not playing")
+        await channel.send("Already not playing")
         return
     vc.src.pause()
 
 async def resume(channel):
     if (vc.src.is_playing()):   
-        channel.send("Already playing")
+        await channel.send("Already playing")
         return
     vc.src.resume()
 
 async def stop(channel):
     if (not vc.src.is_playing()):   
-        channel.send("Already not playing")
+        await channel.send("Already not playing")
         return
     vc.src.stop()
 
 async def volume(channel, args):
     if (not vc.src.is_playing()):   
-        channel.send("Nothing is playing")
+        await channel.send("Nothing is playing")
         return
 
     vol = 100
