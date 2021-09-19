@@ -1,6 +1,4 @@
-import discord
-
-audio = None
+from . import vc
 
 async def execute(msg, args, flags): 
     user = msg.author
@@ -13,16 +11,19 @@ async def execute(msg, args, flags):
         await leave(user, channel)
 
 async def join(user, channel):
-    global audio
     if (user.voice):
-        audio = await user.voice.channel.connect()
+        if (vc.src != None and vc.src.is_connected()):
+            await channel.send("I am in a voice channel already!")
+            return
+            
+        vc.src = await user.voice.channel.connect()
+        await channel.send("I have connected")
 
     else:   await channel.send("You are not in a vc")
 
 async def leave(user, channel):
-    global audio
-    if (audio != None and audio.is_connected()):
-        await audio.disconnect()
+    if (vc.src != None and vc.src.is_connected()):
+        await vc.src.disconnect()
         await channel.send("I have left the vc")
 
     else:   await channel.send("I am not in a vc, silly!")

@@ -1,117 +1,106 @@
-is_playing = False
-has_video = False
-## remember to comment this out later
-valid = True
+import discord
+import youtube_dl
+from . import vc
 
 def isnumber(str):
     dig = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
     return all([c in dig for c in str])
 
-async def execute(message, args, flags):
-    global is_playing
-    global has_video
-    print("is_playing:")
-    if is_playing:
-        print("Yes")
-    else:
-        print("No")
-    print("has_video:")
-    if has_video:
-        print("Yes")
-    else:
-        print("No")
-    if args[0] == "play":
-        if valid == False:
-            await message.channel.send("Enter a valid video")
-            return
-        else:
-            ## check flags
-            if not flags:
-                await message.channel.send("Enter at least 1 flag")
+async def execute(msg, args, flags):
+    user = msg.author
+    channel = msg.channel
+
+    if (vc.src == None or not vc.src.is_connected()):
+        await channel.send("Run the join command first")
+        return
+
+    if (args[0] == "play"):
+        await play(args, flags, channel)
+    
+    if (args[0] == "pause"):
+        await pause()
+    
+    if (args[0] == "continue"):
+        await resume()
+    
+    if (args[0] == "stop"):
+        await stop()
+    
+    if (args[0] == "volume"):
+        await volume(channel, args)
+
+async def play(args, flags, channel):
+    vc.src.stop()
+    vol = 100
+
+    if ("youtube.com/watch?v=" in args[1]):
+
+        if (flags):
+            flag = flags[0].split(":")
+
+            # if we do not have 2 tokens after splitting then the flag is formatted incorrectly
+            if (len(flag) != 2):
+                await channel.send("Invalid flag format")
                 return
-            elif len(flags) == 1:
-                flag = flags[0].split(":")
-                ## if we do not have 2 tokens after splitting this flag is formatted incorrectly
-                if len(flag) != 2:
-                    await message.channel.send("Invalid flag format")
-                    return
-                ## since single flag, cannot be s
-                if flag[0] != "-v":
-                    await message.channel.send("Invalid flag format")
-                    return
-                else:
-                    flag[1] = flag[1].lstrip("0")
-                    ## in case flag[1] = 0
-                    if not flag[1]:
-                        flag[1] = "0"
-                    if not isnumber(flag[1]):
-                        await message.channel.send("Enter a positive integer for the volume")
-                        return
-                    await message.channel.send("Playing the video at volume " + flag[1])
-                    has_video = True
-                    is_playing = True
-                    return
-            elif len(flags) == 2:
-                ## split so we can parse the validity
-                flag1 = flags[0].split(":")
-                flag2 = flags[1].split(":")
-                ## if we do not have 2 tokens after splitting this flag is formatted incorrectly
-                if len(flag1) != 2 or len(flag2) != 2:
-                    await message.channel.send("Invalid flag format")
-                    return
-                ## add to a set
-                allflags = set()
-                allflags.add(flag1[0])
-                allflags.add(flag2[0])
-                ## check if "-s" and "-v" are present
-                if "-s" in allflags and "-v" in allflags:
-                    flag1[1] = flag1[1].lstrip("0")
-                    if not flag1[1]:
-                        flag1[1] = "0"
-                    flag2[1] = flag2[1].lstrip("0")
-                    if not flag2[1]:
-                        flag2[1] = "0"
-                    if not isnumber(flag1[1]) or not isnumber(flag2[1]):
-                        await message.channel.send("Enter a positive integer for the volume and speed")
-                        return
-                    volume = ""
-                    speed = ""
-                    if (flag1[0] == "-s"):
-                        speed = flag1[1]
-                        volume = flag2[1]
-                    else:
-                        speed = flag2[1]
-                        volume = flag1[1]
-                    await message.channel.send("Playing the video at volume " + volume + " and at speed " + speed)
-                    has_video = True
-                    is_playing = True
-                    return
+
+            # if the flag doesn't start with the proper volume flag synatax
+            if (flag[0] != "-v"):
+                await channel.send("Invalid flag format")
+                return
+
             else:
-                await message.channel.send("Too many flags")
-                return has_video, is_playing
-    elif args[0] == "pause":
-        ## should have no flags
-        if flags:
-            await message.channel.send("Too many flags")
-            return
-        if not has_video:
-            await message.channel.send("start playing a video before trying to pause")
-        if not is_playing:
-            await message.channel.send("Your video is already paused")
-        else:
-            is_playing = False
-            await message.channel.send("Paused the video")
+                flag[1] = flag[1].lstrip("0")
+                ## in case flag[1] = 0
+                if not flag[1]:
+                    flag[1] = "0"
+                if not isnumber(flag[1]):
+                    await channel.send("Enter a positive integer for the volume")
+                    return
+                if int(flag[1]) > 100:
+                    await channel.send("Between 0 and 100 please")
+                    return
+                await channel.send("Playing the video at volume " + flag[1])
+                vol = int(flag[1])
+
+        with youtube_dl.YoutubeDL({}) as ydl:
+            song = ydl.extract_info(args[1], download=False)
+            
+        vc.src.play(discord.FFmpegPCMAudio(song["formats"][0]["url"]))
+        vc.src.source = discord.PCMVolumeTransformer(vc.src.source, volume = (vol/100))
+
+async def pause():
+    if (not vc.src.is_playing()):   
+        print("Already not playing")
         return
-    elif args[0] == "continue":
-        ## shoulve have no flags
-        if flags:
-            await message.channel.send("Too many flags")
-            return
-        if not has_video:
-            await message.channel.send("start playing a video before trying to continue")
-        if is_playing:
-            await message.channel.send("Your video is already playing")
-        else:
-            is_playing = True
-            await message.channel.send("Resumed the video")
+    vc.src.pause()
+
+async def resume():
+    if (vc.src.is_playing()):   
+        print("Already playing")
         return
+    vc.src.resume()
+
+async def stop():
+    if (not vc.src.is_playing()):   
+        print("Already not playing")
+        return
+    vc.src.stop()
+
+async def volume(channel, args):
+    if (not vc.src.is_playing()):   
+        print("Nothing is playing")
+        return
+
+    vol = 100
+
+    if (len(args) >= 2):
+        args[1] = args[1].lstrip("0")
+        
+        if (isnumber(args[1])):
+            vol = int(args[1])
+            await channel.send("Made the volume " + vol + " percent louder")
+            vc.src.source = discord.PCMVolumeTransformer(vc.src.source, volume = (vol/100))
+
+        else:
+            await channel.send("Enter a positive integer for the volume (the percentage you want to make it louder or quieter)")
+            return
