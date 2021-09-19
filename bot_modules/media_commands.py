@@ -89,8 +89,12 @@ async def play(args, flags, channel):
                     await channel.send("The video is unavailable")
                     return
                 
+                elif ("Premieres" in str(e)):
+                    await channel.send("Cannot play premieres")
+                    return
+                
                 else:
-                    await channel.send("An error has occurred")
+                    await channel.send("An error occurred")
                     return
 
         # play the audio at the proper volume
