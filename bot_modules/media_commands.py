@@ -1,5 +1,6 @@
 import discord
 import youtube_dl
+import re
 from . import vc
 
 # custom function to determine if a string is an integer since built in functions were sus
@@ -34,7 +35,7 @@ async def play(args, flags, channel):
     vol = 100
 
     # if there are enough arguments (so its a good link)
-    if (len(args) >= 2 and "youtube.com/watch?v=" in args[1]):
+    if (len(args) >= 2 and re.search(r"^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*(?:[&\/\#].*)?$", args[1])):
 
         # parse flags (volume is the only one)
         if (flags):
