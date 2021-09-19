@@ -1,5 +1,4 @@
 import discord
-import youtube_dl
 import config
 import command
 
