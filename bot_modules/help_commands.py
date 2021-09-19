@@ -2,11 +2,11 @@ import discord
 import config
 
 async def execute(msg, args, flags):
-    user = msg.author
     channel = msg.channel
 
     if (len(args) == 1 and args[0] == "help"):
         
+        # help command (general help)
         embed3 = discord.Embed(title = "Run the help command followed by another command to learn more about the command. In the examples given for the commands, mandatory arguments are indicated with <>, and optional arguments are indicated with ().")
         await channel.send(embed=embed3)
 
@@ -24,7 +24,8 @@ async def execute(msg, args, flags):
         embed2.add_field(name="Search", value="Returns the top 5 search results for a given keyword", inline=True)
         await channel.send(embed=embed2)
 
-        
+    # help commands for the specific commands
+    # --------------------------------------------------------------------------------
     elif (len(args) == 2 and args[1] == "pause"):
         embed = discord.Embed(title = "Pause",description = "Pauses whatever is currently playing")
         embed.add_field(name="Usage", value= "``" + config.PREFIX + "pause``", inline=True)

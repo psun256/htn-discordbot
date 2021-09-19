@@ -1,12 +1,7 @@
 import discord
 import re
-from youtube_dl import YoutubeDL
+import youtube_dl
 from requests import get
-
-ydl_opts = {
-    'noplaylist' : 'True',
-    'nopremiere' : 'True'
-}
 
 async def find_videos(arg, message):
     # empty arg
@@ -16,14 +11,14 @@ async def find_videos(arg, message):
     
     # regex thing i stole off the internet to help us filter out websites,
     # because youtube dl doesn't have fun when you enter a website or video
-    expression = "(http(s)?:\\/\\/.)?(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#?&//=]*)"
+    expression = r"(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"
     if (re.search(expression, arg)):
         await message.channel.send("Please don't put a url here")
         return
 
     # get the search results
     waiting = await message.channel.send("Fetching search results...")
-    with YoutubeDL(ydl_opts) as ydl:
+    with youtube_dl.YoutubeDL({'noplaylist' : 'True'}) as ydl:
         try:
             get(arg)
         except:
@@ -31,11 +26,10 @@ async def find_videos(arg, message):
         else:
             video = ydl.extract_info(arg, download = 'False')
 
-    # create embed
     empty = True
 
+    # iterate through all the returned videos
     for i in range(min(5, len(video))):
-
         empty = False
         duration = int(video[i]['duration'])
         minutes = duration // 60
@@ -43,19 +37,17 @@ async def find_videos(arg, message):
 
         # build the embed
         embd = discord.Embed(title = "Search Result " + str(i+1))
-        
-        embd.add_field(name = str(i + 1) + ". " + video[i]['title'],
-        value = "[Video Link](" + video[i]['webpage_url'] + ") | Channel: [" + video[i]['uploader'] + "](" + video[i]['uploader_url'] + ")\nDuration: " + str(minutes) + "m " + str(seconds) + "s" + '\n' + re.sub(r'\n+', '\n', video[i]['description'][:100]).strip() + ("..." if len(video[i]['description']) > 100 else ""),
-        inline = False
+        embd.add_field(
+            name = str(i + 1) + ". " + video[i]['title'],
+            value = "[Video Link](" + video[i]['webpage_url'] + ") | Channel: [" + video[i]['uploader'] + "](" + video[i]['uploader_url'] + ")\nDuration: " + str(minutes) + "m " + str(seconds) + "s\n" + '\n'.join(re.sub(r'\n+', '\n', video[i]['description'][:100]).strip().split('\n')[:3]) + ("..." if len(video[i]['description']) > 100 else ""),
+            inline = False
         )
-
         embd.set_thumbnail(url=video[i]['thumbnail'])
 
-        await message.channel.send(embed = embd, allowed_mentions = discord.AllowedMentions(everyone = False))
-        
+        await message.channel.send(embed = embd)
+    
+    # if its empty then let them know
     if empty:
         await message.channel.send("No results :(")
 
     await discord.Message.delete(waiting)
-        
-  
