@@ -33,7 +33,7 @@ async def play(args, flags, channel):
     vc.src.stop()
     vol = 100
 
-    if ("youtube.com/watch?v=" in args[1]):
+    if (len(args) >= 2 and "youtube.com/watch?v=" in args[1]):
 
         if (flags):
             flag = flags[0].split(":")
@@ -56,8 +56,8 @@ async def play(args, flags, channel):
                 if not isnumber(flag[1]):
                     await channel.send("Enter a positive integer for the volume")
                     return
-                if int(flag[1]) > 100:
-                    await channel.send("Between 0 and 100 please")
+                if int(flag[1]) > 200:
+                    await channel.send("Between 0 and 200 please")
                     return
                 await channel.send("Playing the video at volume " + flag[1])
                 vol = int(flag[1])
@@ -67,23 +67,28 @@ async def play(args, flags, channel):
 
         vc.src.play(discord.FFmpegPCMAudio(song["formats"][0]["url"]))
         vc.src.source = discord.PCMVolumeTransformer(vc.src.source, volume = (vol/100))
+    
+    else: await channel.send("Please enter something valid")
 
 async def pause(channel):
     if (not vc.src.is_playing()):
         await channel.send("Already not playing")
         return
+
     vc.src.pause()
 
 async def resume(channel):
     if (vc.src.is_playing()):
         await channel.send("Already playing")
         return
-    vc.src.resume()
 
+    vc.src.resume()
+    
 async def stop(channel):
     if (not vc.src.is_playing()):
         await channel.send("Already not playing")
         return
+
     vc.src.stop()
 
 async def volume(channel, args):
@@ -98,6 +103,9 @@ async def volume(channel, args):
 
         if (isnumber(args[1])):
             vol = int(args[1])
+            if int(args[1]) > 200:
+                await channel.send("Between 0 and 200 please")
+                return
             await channel.send("Set the volume to " + str(vol) + " percent of previous level")
             vc.src.source = discord.PCMVolumeTransformer(vc.src.source, volume = (vol/100))
 

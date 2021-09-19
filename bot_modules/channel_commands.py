@@ -1,6 +1,6 @@
+import config
 from . import vc
 from . import search
-import config
 
 async def execute(msg, args, flags):
     user = msg.author
