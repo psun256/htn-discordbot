@@ -22,7 +22,13 @@ async def find_videos(arg, message):
         try:
             get(arg)
         except:
-            video = ydl.extract_info(f"ytsearch5:{arg}", download = False)['entries']
+            try:
+                video = ydl.extract_info(f"ytsearch5:{arg}", download = False)['entries']
+            except youtube_dl.utils.DownloadError as e:
+                if ("age" in str(e)):
+                    await message.channel.send('Unsafe search query!')
+                else:
+                    await message.channel.send('An error has occured')
         else:
             video = ydl.extract_info(arg, download = 'False')
 
@@ -32,16 +38,27 @@ async def find_videos(arg, message):
     for i in range(min(5, len(video))):
         empty = False
         duration = int(video[i]['duration'])
+        hours = duration // 3600
+        duration -= hours * 3600
         minutes = duration // 60
-        seconds = duration % 60
+        duration -= minutes * 60
+        seconds = duration
 
         # build the embed
         embd = discord.Embed(title = "Search Result " + str(i+1))
-        embd.add_field(
-            name = str(i + 1) + ". " + video[i]['title'],
-            value = "[Video Link](" + video[i]['webpage_url'] + ") | Channel: [" + video[i]['uploader'] + "](" + video[i]['uploader_url'] + ")\nDuration: " + str(minutes) + "m " + str(seconds) + "s\n" + '\n'.join(re.sub(r'\n+', '\n', video[i]['description'][:100]).strip().split('\n')[:3]) + ("..." if len(video[i]['description']) > 100 else ""),
-            inline = False
-        )
+        ## check if the video length is over an hour
+        if hours:
+            embd.add_field(
+                name = str(i + 1) + ". " + video[i]['title'],
+                value = "[Video Link](" + video[i]['webpage_url'] + ") | Channel: [" + video[i]['uploader'] + "](" + video[i]['uploader_url'] + ")\nDuration: " + str(hours) + "h " + str(minutes) + "m " + str(seconds) + "s\n" + '\n'.join(re.sub(r'\n+', '\n', video[i]['description'][:100]).strip().split('\n')[:3]) + ("..." if len(video[i]['description']) > 100 else ""),
+                inline = False
+            )
+        else:
+            embd.add_field(
+                name = str(i + 1) + ". " + video[i]['title'],
+                value = "[Video Link](" + video[i]['webpage_url'] + ") | Channel: [" + video[i]['uploader'] + "](" + video[i]['uploader_url'] + ")\nDuration: " + str(minutes) + "m " + str(seconds) + "s\n" + '\n'.join(re.sub(r'\n+', '\n', video[i]['description'][:100]).strip().split('\n')[:3]) + ("..." if len(video[i]['description']) > 100 else ""),
+                inline = False
+            )
         embd.set_thumbnail(url=video[i]['thumbnail'])
 
         await message.channel.send(embed = embd)
