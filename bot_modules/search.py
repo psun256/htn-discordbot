@@ -22,6 +22,7 @@ async def find_videos(arg, message):
         return
 
     # get the search results
+    waiting = await message.channel.send("Fetching search results...")
     with YoutubeDL(ydl_opts) as ydl:
         try:
             get(arg)
@@ -44,16 +45,17 @@ async def find_videos(arg, message):
         embd = discord.Embed(title = "Search Result " + str(i+1))
         
         embd.add_field(name = str(i + 1) + ". " + video[i]['title'],
-        value = "[Video Link](" + video[i]['webpage_url'] + ") | Channel: [" + video[i]['uploader'] + "](" + video[i]['uploader_url'] + ")\nDuration: " + str(minutes) + "m " + str(seconds) + "s" + '\n' + video[i]['description'][:100] + ("..." if len(video[i]['description']) > 100 else ""),
+        value = "[Video Link](" + video[i]['webpage_url'] + ") | Channel: [" + video[i]['uploader'] + "](" + video[i]['uploader_url'] + ")\nDuration: " + str(minutes) + "m " + str(seconds) + "s" + '\n' + re.sub(r'\n+', '\n', video[i]['description'][:100]).strip() + ("..." if len(video[i]['description']) > 100 else ""),
         inline = False
         )
 
         embd.set_thumbnail(url=video[i]['thumbnail'])
-        
-        if empty:
-            await message.channel.send("No results :(")
 
-        else:
-            await message.channel.send(embed = embd, allowed_mentions = discord.AllowedMentions(everyone = False))    
+        await message.channel.send(embed = embd, allowed_mentions = discord.AllowedMentions(everyone = False))
+        
+    if empty:
+        await message.channel.send("No results :(")
+
+    await discord.Message.delete(waiting)
         
   
